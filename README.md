@@ -24,3 +24,4 @@ Please use caution when downloading and installing software from the internet:
 ---
 
 *This is an MVP release for testing functionality. Feedback and contributions are welcome!*
+*Currently only avalible on Windows. Linux and Mac support planned*
