@@ -1,0 +1,50 @@
+/* Global widget style */
+QWidget {
+    background-color: #2E3440;
+    font-family: Arial;
+    font-size: 14px;
+    color: #D8DEE9;
+}
+
+/* Timer label */
+QLabel {
+    font-size: 18px;
+    font-weight: bold;
+    color: #cd75bfff;
+}
+
+/* Buttons */
+QPushButton {
+    background-color: #715776ff;
+    color: white;
+    border-radius: 5px;
+    padding: 6px;
+}
+QPushButton:hover {
+    background-color: #715776ff;
+}
+QPushButton:pressed {
+    background-color: #4C566A;
+}
+
+/* To-do list */
+QListWidget {
+    background-color: #3B4252;
+    color: #ECEFF4;
+    border: 1px solid #715776ff;
+    border-radius: 5px;
+    padding: 5px;
+}
+QListWidget::item:selected {
+    background-color: #715776ff;
+    color: #2E3440;
+}
+
+/* Input fields */
+QLineEdit {
+    background-color: #434C5E;
+    color: #ECEFF4;
+    border: 1px solid #715776ff;
+    border-radius: 5px;
+    padding: 4px;
+}

@@ -4,6 +4,7 @@ from PyQt6.QtWidgets import (
     QLabel, QPushButton, QListWidget, QLineEdit, QSpinBox
 )
 from PyQt6.QtCore import QTimer
+from PyQt6.QtCore import Qt
 
 
 class FocusDock(QWidget):
@@ -11,11 +12,12 @@ class FocusDock(QWidget):
         super().__init__()
         self.setWindowTitle("FocusDock - MVP")
         self.setGeometry(100, 100, 400, 500)
-
         self.layout = QVBoxLayout()
 
         # Timer controls layout
         timer_layout = QHBoxLayout()
+        timer_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        timer_layout.setSpacing(10)
         self.timer_label = QLabel("25:00")
         timer_layout.addWidget(self.timer_label)
 
@@ -31,6 +33,7 @@ class FocusDock(QWidget):
 
         # Timer length selector
         length_layout = QHBoxLayout()
+        length_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         length_layout.addWidget(QLabel("Minutes:"))
         self.timer_length_spin = QSpinBox()
         self.timer_length_spin.setMinimum(1)
@@ -134,6 +137,10 @@ class FocusDock(QWidget):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+
+    with open("style.qss", "r") as f:
+        app.setStyleSheet(f.read())
+
     window = FocusDock()
     window.show()
     sys.exit(app.exec())
