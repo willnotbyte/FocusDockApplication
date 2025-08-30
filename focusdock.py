@@ -11,7 +11,19 @@ class FocusDock(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("FocusDock - MVP")
-        self.setGeometry(100, 100, 400, 500)
+        self.resize(600, 800)
+
+        # Get screen geometry
+        screen = QApplication.primaryScreen()
+        screen_size = screen.availableGeometry()
+        screen_width = screen_size.width()
+        screen_height = screen_size.height()
+
+        # Calculate top-left corner for centered window
+        x = (screen_width - self.width()) // 2
+        y = (screen_height - self.height()) // 2
+
+        self.setGeometry(x, y, self.width(), self.height())
         self.layout = QVBoxLayout()
 
         # Timer controls layout
