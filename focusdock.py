@@ -1,4 +1,4 @@
-import sys
+import sys, os
 from PyQt6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QListWidget, QLineEdit, QSpinBox
@@ -134,13 +134,25 @@ class FocusDock(QWidget):
         for item in selected_items:
             self.todo_list.takeItem(self.todo_list.row(item))
 
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # When running as a bundled app
+        base_path = sys._MEIPASS
+    except Exception:
+        # When running normally
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
-    with open("style.qss", "r") as f:
+    # Use resource_path to find style.qss
+    qss_path = resource_path("style.qss")
+    with open(qss_path, "r") as f:
         app.setStyleSheet(f.read())
 
+    from focusdock import FocusDock
     window = FocusDock()
     window.show()
     sys.exit(app.exec())
