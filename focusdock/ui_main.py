@@ -1,10 +1,11 @@
+import sys, os
 from PyQt6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout,
-    QLabel, QPushButton, QListWidget, QLineEdit, QSpinBox,
+    QWidget, QVBoxLayout, QHBoxLayout, QLabel,
+    QPushButton, QListWidget, QLineEdit, QSpinBox,
     QMessageBox, QTabWidget, QApplication
 )
 from PyQt6.QtCore import QTimer, Qt
-from focusdock.analytics_tab import AnalyticsTab
+from focusdock.todo_manager import TodoManager
 
 class FocusDock(QWidget):
     def __init__(self):
@@ -12,35 +13,27 @@ class FocusDock(QWidget):
         self.setWindowTitle("FocusDock - MVP")
         self.resize(600, 800)
 
-        # Task analytics
-        self.total_tasks = 0
-        self.completed_tasks = 0
-        self.uncompleted_tasks = 0
+        # Timer variables
+        self.original_time = 25 * 60
+        self.time_left = self.original_time
+        self.timer_running = False
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update_timer)
 
-        # Center window
-        screen = QApplication.primaryScreen()
-        screen_size = screen.availableGeometry()
-        x = (screen_size.width() - self.width()) // 2
-        y = (screen_size.height() - self.height()) // 2
-        self.setGeometry(x, y, self.width(), self.height())
+        # Task manager
+        self.todo_manager = TodoManager()
 
-        # Main layout and tabs
+        # Main layout & tabs
         self.main_layout = QVBoxLayout(self)
         self.tabs = QTabWidget()
         self.main_layout.addWidget(self.tabs)
 
-        # ---- Focus Tab ----
+        # --- Focus tab ---
         self.tab1 = QWidget()
         self.tab1_layout = QVBoxLayout(self.tab1)
         self.tabs.addTab(self.tab1, "Focus")
-        self._setup_focus_tab()
 
-        # ---- Analytics Tab ----
-        self.tab2 = AnalyticsTab(self)
-        self.tabs.addTab(self.tab2, "Analytics")
-
-    def _setup_focus_tab(self):
-        # Timer layout
+        # Timer display + controls
         timer_layout = QHBoxLayout()
         timer_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.timer_label = QLabel("25:00")
@@ -55,48 +48,57 @@ class FocusDock(QWidget):
         timer_layout.addWidget(self.reset_button)
         self.tab1_layout.addLayout(timer_layout)
 
-        # Timer length
+        # Timer length input (minutes + seconds)
         length_layout = QHBoxLayout()
         length_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         length_layout.addWidget(QLabel("Minutes:"))
-        self.timer_length_spin = QSpinBox()
-        self.timer_length_spin.setMinimum(1)
-        self.timer_length_spin.setMaximum(180)
-        self.timer_length_spin.setValue(25)
-        length_layout.addWidget(self.timer_length_spin)
+        self.timer_length_minutes = QSpinBox()
+        self.timer_length_minutes.setMinimum(0)
+        self.timer_length_minutes.setMaximum(180)
+        self.timer_length_minutes.setValue(25)
+        length_layout.addWidget(self.timer_length_minutes)
+
+        length_layout.addWidget(QLabel("Seconds:"))
+        self.timer_length_seconds = QSpinBox()
+        self.timer_length_seconds.setMinimum(0)
+        self.timer_length_seconds.setMaximum(59)
+        self.timer_length_seconds.setValue(0)
+        length_layout.addWidget(self.timer_length_seconds)
 
         self.set_button = QPushButton("Set")
         self.set_button.clicked.connect(self.set_timer)
         length_layout.addWidget(self.set_button)
         self.tab1_layout.addLayout(length_layout)
 
-        # Todo input
+        # To-do list input
         todo_input_layout = QHBoxLayout()
         self.todo_input = QLineEdit()
         self.todo_input.setPlaceholderText("Add a new task...")
         todo_input_layout.addWidget(self.todo_input)
 
         add_button = QPushButton("Add Task")
-        add_button.clicked.connect(self.add_task)
+        add_button.clicked.connect(lambda: self.todo_manager.add_task(self.todo_input.text(), self.todo_list))
         todo_input_layout.addWidget(add_button)
         self.tab1_layout.addLayout(todo_input_layout)
 
-        # Todo list
+        # To-do list widget
         self.todo_list = QListWidget()
         self.tab1_layout.addWidget(self.todo_list)
 
+        # Remove task button
         remove_button = QPushButton("Remove Selected Task")
-        remove_button.clicked.connect(self.remove_task)
+        remove_button.clicked.connect(lambda: self.todo_manager.remove_task(self.todo_list))
         self.tab1_layout.addWidget(remove_button)
 
-        # Timer
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.update_timer)
-        self.timer_running = False
-        self.original_time = self.timer_length_spin.value() * 60
-        self.time_left = self.original_time
+        # --- Analytics tab ---
+        self.tab2 = QWidget()
+        self.tab2_layout = QVBoxLayout(self.tab2)
+        self.tabs.addTab(self.tab2, "Analytics")
 
-    # ---------------- Timer Methods ----------------
+        self.analytics_label = QLabel("Analytics will go here")
+        self.tab2_layout.addWidget(self.analytics_label)
+
+    # ------------------ Timer Methods ------------------
     def start_timer(self):
         if self.timer_running:
             self.timer.stop()
@@ -110,7 +112,7 @@ class FocusDock(QWidget):
     def set_timer(self):
         self.timer.stop()
         self.timer_running = False
-        self.original_time = self.timer_length_spin.value() * 60
+        self.original_time = self.timer_length_minutes.value() * 60 + self.timer_length_seconds.value()
         self.time_left = self.original_time
         self.update_timer_label()
         self.start_button.setText("Start")
@@ -134,33 +136,15 @@ class FocusDock(QWidget):
         seconds = self.time_left % 60
         self.timer_label.setText(f"{minutes:02d}:{seconds:02d}")
 
-    # ---------------- Task Methods ----------------
-    def add_task(self):
-        task_text = self.todo_input.text().strip()
-        if task_text:
-            self.total_tasks += 1
-            self.todo_list.addItem(task_text)
-            self.todo_input.clear()
-
-    def remove_task(self):
-        selected_items = self.todo_list.selectedItems()
-        if not selected_items:
-            return
-        for item in selected_items:
-            self.todo_list.takeItem(self.todo_list.row(item))
-            self.completed_tasks += 1
-
     def timer_finished(self):
-        self.uncompleted_tasks = self.total_tasks - self.completed_tasks
+        uncompleted = self.todo_manager.get_uncompleted_tasks()
+        completed = self.todo_manager.completed_tasks
         self.reset_timer()
         msg = QMessageBox()
         msg.setWindowTitle("Timer Alert")
-        if self.uncompleted_tasks != 0:
-            msg.setText(
-                f"Your timer has finished! You have finished {self.completed_tasks} tasks! "
-                f"You still had {self.uncompleted_tasks} tasks to go, great work so far!"
-            )
+        if uncompleted != 0:
+            msg.setText(f"Your timer has finished! You have finished {completed} tasks! You still have {uncompleted} tasks to go!")
         else:
-            msg.setText(f"Your timer has finished! You have finished all {self.completed_tasks} tasks! Great job!")
+            msg.setText(f"Your timer has finished! You have finished all {completed} tasks! Great job!")
         msg.setIcon(QMessageBox.Icon.Information)
         msg.exec()
