@@ -1,10 +1,10 @@
 import sys, os
 from PyQt6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout,
-    QLabel, QPushButton, QListWidget, QLineEdit, QSpinBox
+    QLabel, QPushButton, QListWidget, QLineEdit, QSpinBox,
+    QMessageBox
 )
-from PyQt6.QtCore import QTimer
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import QTimer, Qt
 
 
 class FocusDock(QWidget):
@@ -124,8 +124,8 @@ class FocusDock(QWidget):
             self.time_left -= 1
             self.update_timer_label()
         else:
-            self.timer.stop()
-            self.timer_label.setText("Time's up!")
+            # Timer finished
+            self.timer_finished()
 
     def update_timer_label(self):
         minutes = self.time_left // 60
@@ -145,6 +145,14 @@ class FocusDock(QWidget):
             return
         for item in selected_items:
             self.todo_list.takeItem(self.todo_list.row(item))
+    
+    def timer_finished(self):
+        self.reset_timer()
+        msg = QMessageBox()
+        msg.setWindowTitle("Timer Alert")
+        msg.setText("Your timer has finished!")
+        msg.setIcon(QMessageBox.Icon.Information)
+        msg.exec()
 
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
