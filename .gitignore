@@ -1,8 +1,11 @@
-# Ignore venv directory
+# Ignor directories
 venv/
 build/
 dist/
 builds/
+__pycache__/
 
-# Ignore log files
+# Ignore files
 *.log
+*.pyc
+*.spec
