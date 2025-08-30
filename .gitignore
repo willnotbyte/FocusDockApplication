@@ -2,6 +2,7 @@
 venv/
 build/
 dist/
+builds/
 
 # Ignore log files
 *.log
