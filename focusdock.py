@@ -13,6 +13,11 @@ class FocusDock(QWidget):
         self.setWindowTitle("FocusDock - MVP")
         self.resize(600, 800)
 
+        # Task analytics
+        self.total_tasks = 0
+        self.uncompleted_tasks = 0
+        self.completed_tasks = 0
+
         # Get screen geometry
         screen = QApplication.primaryScreen()
         screen_size = screen.availableGeometry()
@@ -136,6 +141,7 @@ class FocusDock(QWidget):
     def add_task(self):
         task_text = self.todo_input.text().strip()
         if task_text:
+            self.total_tasks += 1
             self.todo_list.addItem(task_text)
             self.todo_input.clear()
 
@@ -145,12 +151,14 @@ class FocusDock(QWidget):
             return
         for item in selected_items:
             self.todo_list.takeItem(self.todo_list.row(item))
+            self.completed_tasks += 1
     
     def timer_finished(self):
+        self.uncompleted_tasks = (self.total_tasks - self.completed_tasks)
         self.reset_timer()
         msg = QMessageBox()
         msg.setWindowTitle("Timer Alert")
-        msg.setText("Your timer has finished!")
+        msg.setText(f"Your timer has finished! You have finished {self.completed_tasks} tasks! You still had {self.uncompleted_tasks} tasks to go, great work so far!")
         msg.setIcon(QMessageBox.Icon.Information)
         msg.exec()
 
