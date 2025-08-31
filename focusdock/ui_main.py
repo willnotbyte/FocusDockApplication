@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import QTimer, Qt, QTime
 from focusdock.todo_manager import TodoManager
 from focusdock.analytics_tab import AnalyticsTab
+from focusdock.settings_tab import SettingsTab
 
 class FocusDock(QWidget):
     def __init__(self):
@@ -20,6 +21,8 @@ class FocusDock(QWidget):
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_timer)
 
+        self.can_add = True
+
         # Main layout & tabs
         self.main_layout = QVBoxLayout(self)
         self.tabs = QTabWidget()
@@ -29,6 +32,9 @@ class FocusDock(QWidget):
         self.tab1 = QWidget()
         self.tab1_layout = QVBoxLayout(self.tab1)
         self.tabs.addTab(self.tab1, "Focus")
+
+        # --- Initiate Settiings ---
+        self.settings = SettingsTab(self)
 
         # Timer display + controls
         timer_layout = QHBoxLayout()
@@ -82,25 +88,32 @@ class FocusDock(QWidget):
         # Connect Add/Remove buttons
         add_button.clicked.connect(lambda: [
             self.todo_manager.add_task(self.todo_input.text()),
-            self.tab2.update_stats()
+            self.analytics.update_stats()
         ])
         remove_button.clicked.connect(lambda: [
             self.todo_manager.remove_task(self.todo_list.currentRow()),
-            self.tab2.update_stats()
+            self.analytics.update_stats()
         ])
 
         # --- Analytics tab ---
-        self.tab2 = AnalyticsTab(self)
-        self.tabs.addTab(self.tab2, "Analytics")
+        self.analytics = AnalyticsTab(self)
+        self.tabs.addTab(self.analytics, "Analytics")
+
+        # --- Settings tab ---
+        self.tabs.addTab(self.settings, "Settings")
 
     # ------------------ Timer Methods ------------------
     def start_timer(self):
         if self.timer_running:
             self.timer.stop()
+            self.can_add = False
             self.timer_running = False
             self.start_button.setText("Resume")
         else:
+            if self.can_add:
+                self.settings.add_increment()
             self.timer.start(1000)
+            self.can_add = False
             self.timer_running = True
             self.start_button.setText("Pause")
 
@@ -111,10 +124,12 @@ class FocusDock(QWidget):
         self.update_timer_label()
         self.start_button.setText("Start")
         self.timer.stop()
+        self.can_add = True
         self.timer_running = False
 
     def reset_timer(self):
         self.timer.stop()
+        self.can_add = True
         self.timer_running = False
         self.time_left = self.original_time
         self.update_timer_label()
