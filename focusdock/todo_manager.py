@@ -3,11 +3,12 @@ class TodoManager:
         self.tasks = []            # All tasks
         self.completed_tasks = 0   # Completed tasks
 
-    def add_task(self, text, list_widget):
+    def add_task(self, text, list_widget, input_field):
         text = text.strip()
         if text:
             self.tasks.append(text)
             list_widget.addItem(text)
+            input_field.clear()
 
     def remove_task(self, list_widget):
         selected_items = list_widget.selectedItems()

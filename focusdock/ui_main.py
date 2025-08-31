@@ -2,9 +2,9 @@ import sys, os
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
     QPushButton, QListWidget, QLineEdit, QSpinBox,
-    QMessageBox, QTabWidget, QApplication
+    QMessageBox, QTabWidget, QApplication, QTimeEdit
 )
-from PyQt6.QtCore import QTimer, Qt
+from PyQt6.QtCore import QTimer, Qt, QTime
 from focusdock.todo_manager import TodoManager
 
 class FocusDock(QWidget):
@@ -51,20 +51,12 @@ class FocusDock(QWidget):
         # Timer length input (minutes + seconds)
         length_layout = QHBoxLayout()
         length_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        length_layout.addWidget(QLabel("Minutes:"))
-        self.timer_length_minutes = QSpinBox()
-        self.timer_length_minutes.setMinimum(0)
-        self.timer_length_minutes.setMaximum(180)
-        self.timer_length_minutes.setValue(25)
-        length_layout.addWidget(self.timer_length_minutes)
-
-        length_layout.addWidget(QLabel("Seconds:"))
-        self.timer_length_seconds = QSpinBox()
-        self.timer_length_seconds.setMinimum(0)
-        self.timer_length_seconds.setMaximum(59)
-        self.timer_length_seconds.setValue(0)
-        length_layout.addWidget(self.timer_length_seconds)
-
+        self.timer_input = QTimeEdit()
+        self.timer_input.setDisplayFormat("mm:ss")
+        self.timer_input.setFixedWidth(80)
+        length_layout.addWidget(QLabel("Set Timer:"))
+        length_layout.addWidget(self.timer_input)
+        
         self.set_button = QPushButton("Set")
         self.set_button.clicked.connect(self.set_timer)
         length_layout.addWidget(self.set_button)
@@ -77,7 +69,7 @@ class FocusDock(QWidget):
         todo_input_layout.addWidget(self.todo_input)
 
         add_button = QPushButton("Add Task")
-        add_button.clicked.connect(lambda: self.todo_manager.add_task(self.todo_input.text(), self.todo_list))
+        add_button.clicked.connect(lambda: self.todo_manager.add_task(self.todo_input.text(), self.todo_list, self.todo_input))
         todo_input_layout.addWidget(add_button)
         self.tab1_layout.addLayout(todo_input_layout)
 
@@ -110,12 +102,13 @@ class FocusDock(QWidget):
             self.start_button.setText("Pause")
 
     def set_timer(self):
-        self.timer.stop()
-        self.timer_running = False
-        self.original_time = self.timer_length_minutes.value() * 60 + self.timer_length_seconds.value()
+        time = self.timer_input.time()
+        self.original_time = time.minute() * 60 + time.second()
         self.time_left = self.original_time
         self.update_timer_label()
         self.start_button.setText("Start")
+        self.timer.stop()
+        self.timer_running = False
 
     def reset_timer(self):
         self.timer.stop()
