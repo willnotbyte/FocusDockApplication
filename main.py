@@ -1,4 +1,4 @@
-import sys, os
+import sys
 from PyQt6.QtWidgets import QApplication
 from focusdock.ui_main import FocusDock
 from resource_utils import resource_path
