@@ -1,9 +1,14 @@
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
+<<<<<<< HEAD
     QPushButton, QListWidget, QLineEdit,
     QMessageBox, QTabWidget, QTimeEdit
+=======
+    QPushButton, QListWidget, QLineEdit, QSpinBox,
+    QMessageBox, QTabWidget, QApplication, QTimeEdit
+>>>>>>> b31a0f50e0295ef8c38cb96357f0961da48261f5
 )
-from PyQt6.QtCore import QTimer, Qt
+from PyQt6.QtCore import QTimer, Qt, QTime
 from focusdock.todo_manager import TodoManager
 from focusdock.analytics_tab import AnalyticsTab
 
@@ -53,7 +58,11 @@ class FocusDock(QWidget):
         self.timer_input.setFixedWidth(80)
         length_layout.addWidget(QLabel("Set Timer:"))
         length_layout.addWidget(self.timer_input)
+<<<<<<< HEAD
 
+=======
+        
+>>>>>>> b31a0f50e0295ef8c38cb96357f0961da48261f5
         self.set_button = QPushButton("Set")
         self.set_button.clicked.connect(self.set_timer)
         length_layout.addWidget(self.set_button)
@@ -66,6 +75,10 @@ class FocusDock(QWidget):
         todo_input_layout.addWidget(self.todo_input)
 
         add_button = QPushButton("Add Task")
+<<<<<<< HEAD
+=======
+        add_button.clicked.connect(lambda: self.todo_manager.add_task(self.todo_input.text(), self.todo_list, self.todo_input))
+>>>>>>> b31a0f50e0295ef8c38cb96357f0961da48261f5
         todo_input_layout.addWidget(add_button)
         self.tab1_layout.addLayout(todo_input_layout)
 
