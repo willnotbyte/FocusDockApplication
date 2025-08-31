@@ -1,13 +1,14 @@
-# FocusDock MVP v0.0.1
+# FocusDock MVP v0.2.0
 
 **FocusDock** is a desktop application built with Python designed to help users focus on tasks without interruptions. This initial release is a **Minimum Viable Product (MVP)** with minimal features and styling.
 
 ## Current Features
 - Timer with start/pause/reset functionality  
-- Basic to-do list  
+- Basic to-do list
+- Alert window upon timer completion
+- Basic analytics
 
 ## Future Features (Planned)
-- Notifications and sound alerts  
 - Locking distracting websites or applications (with user permission)  
 - Task analytics and productivity tracking  
 - Additional quality-of-life improvements  
