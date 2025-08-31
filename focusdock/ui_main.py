@@ -1,11 +1,11 @@
-import sys, os
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLabel,
-    QPushButton, QListWidget, QLineEdit, QSpinBox,
-    QMessageBox, QTabWidget, QApplication
+    QPushButton, QListWidget, QLineEdit,
+    QMessageBox, QTabWidget, QTimeEdit
 )
 from PyQt6.QtCore import QTimer, Qt
 from focusdock.todo_manager import TodoManager
+from focusdock.analytics_tab import AnalyticsTab
 
 class FocusDock(QWidget):
     def __init__(self):
@@ -19,9 +19,6 @@ class FocusDock(QWidget):
         self.timer_running = False
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_timer)
-
-        # Task manager
-        self.todo_manager = TodoManager()
 
         # Main layout & tabs
         self.main_layout = QVBoxLayout(self)
@@ -48,36 +45,27 @@ class FocusDock(QWidget):
         timer_layout.addWidget(self.reset_button)
         self.tab1_layout.addLayout(timer_layout)
 
-        # Timer length input (minutes + seconds)
+        # Timer length input
         length_layout = QHBoxLayout()
         length_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        length_layout.addWidget(QLabel("Minutes:"))
-        self.timer_length_minutes = QSpinBox()
-        self.timer_length_minutes.setMinimum(0)
-        self.timer_length_minutes.setMaximum(180)
-        self.timer_length_minutes.setValue(25)
-        length_layout.addWidget(self.timer_length_minutes)
-
-        length_layout.addWidget(QLabel("Seconds:"))
-        self.timer_length_seconds = QSpinBox()
-        self.timer_length_seconds.setMinimum(0)
-        self.timer_length_seconds.setMaximum(59)
-        self.timer_length_seconds.setValue(0)
-        length_layout.addWidget(self.timer_length_seconds)
+        self.timer_input = QTimeEdit()
+        self.timer_input.setDisplayFormat("mm:ss")
+        self.timer_input.setFixedWidth(80)
+        length_layout.addWidget(QLabel("Set Timer:"))
+        length_layout.addWidget(self.timer_input)
 
         self.set_button = QPushButton("Set")
         self.set_button.clicked.connect(self.set_timer)
         length_layout.addWidget(self.set_button)
         self.tab1_layout.addLayout(length_layout)
 
-        # To-do list input
+        # To-do list input + Add button
         todo_input_layout = QHBoxLayout()
         self.todo_input = QLineEdit()
         self.todo_input.setPlaceholderText("Add a new task...")
         todo_input_layout.addWidget(self.todo_input)
 
         add_button = QPushButton("Add Task")
-        add_button.clicked.connect(lambda: self.todo_manager.add_task(self.todo_input.text(), self.todo_list))
         todo_input_layout.addWidget(add_button)
         self.tab1_layout.addLayout(todo_input_layout)
 
@@ -87,16 +75,24 @@ class FocusDock(QWidget):
 
         # Remove task button
         remove_button = QPushButton("Remove Selected Task")
-        remove_button.clicked.connect(lambda: self.todo_manager.remove_task(self.todo_list))
         self.tab1_layout.addWidget(remove_button)
 
-        # --- Analytics tab ---
-        self.tab2 = QWidget()
-        self.tab2_layout = QVBoxLayout(self.tab2)
-        self.tabs.addTab(self.tab2, "Analytics")
+        # --- Instantiate TodoManager ---
+        self.todo_manager = TodoManager(self.todo_list, self.todo_input)
 
-        self.analytics_label = QLabel("Analytics will go here")
-        self.tab2_layout.addWidget(self.analytics_label)
+        # Connect Add/Remove buttons
+        add_button.clicked.connect(lambda: [
+            self.todo_manager.add_task(self.todo_input.text()),
+            self.tab2.update_stats()
+        ])
+        remove_button.clicked.connect(lambda: [
+            self.todo_manager.remove_task(self.todo_list.currentRow()),
+            self.tab2.update_stats()
+        ])
+
+        # --- Analytics tab ---
+        self.tab2 = AnalyticsTab(self)
+        self.tabs.addTab(self.tab2, "Analytics")
 
     # ------------------ Timer Methods ------------------
     def start_timer(self):
@@ -110,12 +106,13 @@ class FocusDock(QWidget):
             self.start_button.setText("Pause")
 
     def set_timer(self):
-        self.timer.stop()
-        self.timer_running = False
-        self.original_time = self.timer_length_minutes.value() * 60 + self.timer_length_seconds.value()
+        time = self.timer_input.time()
+        self.original_time = time.minute() * 60 + time.second()
         self.time_left = self.original_time
         self.update_timer_label()
         self.start_button.setText("Start")
+        self.timer.stop()
+        self.timer_running = False
 
     def reset_timer(self):
         self.timer.stop()
@@ -138,7 +135,7 @@ class FocusDock(QWidget):
 
     def timer_finished(self):
         uncompleted = self.todo_manager.get_uncompleted_tasks()
-        completed = self.todo_manager.completed_tasks
+        completed = self.todo_manager.get_completed_tasks()
         self.reset_timer()
         msg = QMessageBox()
         msg.setWindowTitle("Timer Alert")
