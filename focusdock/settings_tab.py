@@ -4,6 +4,7 @@ from PyQt6.QtWidgets import (
 )
 
 from focusdock.styles import apply_profile
+from focusdock.storage import load_settings, save_settings
 
 class SettingsTab(QWidget):
 
@@ -53,7 +54,15 @@ class SettingsTab(QWidget):
         layout.addWidget(self.increment_label)
         layout.addWidget(self.reset_inc_btn)
 
+        # Save data
+        self.save_button = QPushButton("Save")
+        self.save_button.clicked.connect(self.save)
+        layout.addWidget(self.save_button)
+
         self.setLayout(layout)
+
+        # Load settings from JSON
+        self.load()
 
         # Initial update
         self.update_stats()
@@ -62,14 +71,17 @@ class SettingsTab(QWidget):
         self.increment_label.setText(f"Life-Time Sessions: {self.increments}")
         self.user_label.setText(f"User: {self.username}")
         self.theme_label.setText(f"Theme Profile: {self.current_profile}")
+        self.theme_dropdown.setCurrentText(self.current_profile)
 
     def add_increment(self):
         self.increments += 1
         self.update_stats()
+        self.save()
 
     def reset_analytics(self):
         self.increments = 0
         self.update_stats()
+        self.save
 
     def set_username(self):
         self.username = self.set_usr_field.text()
@@ -80,5 +92,21 @@ class SettingsTab(QWidget):
         self.current_profile = self.theme_dropdown.currentText()
         self.profile_path = self.current_profile
         apply_profile(self.profile_path)
+        self.update_stats()
+    
+    def save(self):
+        save_settings({
+            "username": self.username,
+            "theme": self.current_profile,
+            "sessions": self.increments
+        })
+    
+    def load(self):
+        settings = load_settings()
+        self.username = settings.get("username", "user")
+        self.current_profile = settings.get("theme", "default.qss")
+        self.profile_path = self.current_profile
+        self.increments = settings.get("sessions", 0)
+
         self.update_stats()
         
