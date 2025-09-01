@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton
 
 class SettingsTab(QWidget):
     def __init__(self, main_window):
@@ -14,8 +14,11 @@ class SettingsTab(QWidget):
         layout.addWidget(self.info_label)
 
         self.increment_label = QLabel()
+        self.reset_inc_btn = QPushButton("Reset Analytics")
+        self.reset_inc_btn.clicked.connect(self.reset_analytics)
 
         layout.addWidget(self.increment_label)
+        layout.addWidget(self.reset_inc_btn)
 
         self.setLayout(layout)
 
@@ -29,5 +32,6 @@ class SettingsTab(QWidget):
         self.increments += 1
         self.update_stats()
 
-    def reset_increments(self):
+    def reset_analytics(self):
         self.increments = 0
+        self.update_stats()
