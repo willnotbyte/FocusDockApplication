@@ -1,13 +1,15 @@
-import sys
+import sys, os
 from PyQt6.QtWidgets import QApplication
 from focusdock.ui_main import FocusDock
 from resource_utils import resource_path
+
+from focusdock.settings_tab import SettingsTab
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     # Load QSS
-    qss_path = resource_path("style.qss")
+    qss_path = resource_path(os.path.join("styles", SettingsTab.profile_path))
     with open(qss_path, "r") as f:
         app.setStyleSheet(f.read())
 

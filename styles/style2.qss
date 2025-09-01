@@ -1,0 +1,79 @@
+/* Global widget style */
+QWidget {
+    background-color: #ff0000;
+    font-family: Arial;
+    font-size: 14px;
+    color: #D8DEE9;
+}
+
+/* Timer label */
+QLabel {
+    font-size: 18px;
+    font-weight: bold;
+    color: #a16397;
+}
+
+/* Buttons */
+QPushButton {
+    font-weight: bold;
+    background-color: #715776;
+    color: white;
+    border-radius: 10px;
+    padding: 8px;
+}
+QPushButton:hover {
+    background-color: #8E6E8F;
+}
+QPushButton:pressed {
+    background-color: #4C566A;
+}
+
+/* To-do list */
+QListWidget {
+    background-color: #3B4252;
+    color: #ECEFF4;
+    border: 1px solid #715776;
+    border-radius: 5px;
+    padding: 5px;
+}
+QListWidget::item:selected {
+    background-color: #715776;
+    color: #ECEFF4;
+}
+
+/* Input fields */
+QLineEdit {
+    background-color: #434C5E;
+    color: #ECEFF4;
+    border: 1px solid #715776;
+    border-radius: 5px;
+    padding: 4px;
+}
+
+/* Tab widget */
+QTabWidget::pane {
+    border: 1px solid #715776;
+    border-radius: 5px;
+    background: #3B4252;
+}
+
+QTabBar::tab {
+    background: #434C5E;
+    color: #ECEFF4;
+    border: 1px solid #715776;
+    border-bottom-color: #3B4252;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    padding: 8px;
+    min-width: 80px;
+    font-weight: bold;
+}
+
+QTabBar::tab:selected {
+    background: #715776;
+    color: #ECEFF4;
+}
+
+QTabBar::tab:hover {
+    background: #8E6E8F;
+}
