@@ -4,6 +4,7 @@ build/
 dist/
 builds/
 __pycache__/
+savedata/
 
 # Ignore files
 *.log

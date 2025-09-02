@@ -5,7 +5,7 @@ import json
 def get_save_path(filename="settings.json"):
     """
     Returns the path to the JSON save file.
-    Creates 'savadata' folder next to the exe if it doesn't exist.
+    Creates 'savedata' folder next to the exe if it doesn't exist.
     """
     if getattr(sys, "frozen", False):
         # Running in PyInstaller bundle
@@ -14,7 +14,7 @@ def get_save_path(filename="settings.json"):
         # Running as script
         base_dir = os.path.dirname(__file__)
     
-    save_dir = os.path.join(base_dir, "savadata")
+    save_dir = os.path.join(base_dir, "savedata")
     os.makedirs(save_dir, exist_ok=True)
     
     return os.path.join(save_dir, filename)
@@ -30,3 +30,18 @@ def save_settings(settings: dict):
     path = get_save_path()
     with open(path, "w") as f:
         json.dump(settings, f, indent=4)
+
+def clear_save():
+    default_data = {
+        "username": "user",
+        "theme": "default.qss",
+        "increments": 0,
+        "tasks": [],
+        "lt_total": 0,
+        "total_completed": 0,
+        "completed": 0
+    }
+
+    path = get_save_path()
+    with open(path, "w") as f:
+        json.dump(default_data, f, indent=4)

@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import (
 )
 
 from focusdock.styles import apply_profile
-from focusdock.storage import load_settings, save_settings
+from focusdock.storage import load_settings, save_settings, clear_save
 
 class SettingsTab(QWidget):
 
@@ -16,13 +16,9 @@ class SettingsTab(QWidget):
         self.main_window = main_window
         layout = QVBoxLayout(self)
 
-        # Keep track of increments
+        # Savedata
         self.increments = 0
-
-        # Set username
         self.username = "user"
-
-        # Theme profile
         self.current_profile = "default.qss"
 
         # Static message
@@ -49,8 +45,8 @@ class SettingsTab(QWidget):
 
         # Analytics data
         self.increment_label = QLabel()
-        self.reset_inc_btn = QPushButton("Reset Analytics")
-        self.reset_inc_btn.clicked.connect(self.reset_analytics)
+        self.reset_inc_btn = QPushButton("Clear Data")
+        self.reset_inc_btn.clicked.connect(self.clear_data)
         layout.addWidget(self.increment_label)
         layout.addWidget(self.reset_inc_btn)
 
@@ -68,7 +64,7 @@ class SettingsTab(QWidget):
         self.update_stats()
 
     def update_stats(self):
-        self.increment_label.setText(f"Life-Time Sessions: {self.increments}")
+        self.increment_label.setText(f"Lifetime Sessions: {self.increments}")
         self.user_label.setText(f"User: {self.username}")
         self.theme_label.setText(f"Theme Profile: {self.current_profile}")
         self.theme_dropdown.setCurrentText(self.current_profile)
@@ -78,15 +74,23 @@ class SettingsTab(QWidget):
         self.update_stats()
         self.save()
 
-    def reset_analytics(self):
-        self.increments = 0
-        self.update_stats()
-        self.save
+    def clear_data(self):
+        clear_save()
+        self.load()
+        # reset timer
+        # set timer to default
+        # set timer field to default
+        self.main_window.full_timer_reset()
+        self.main_window.todo_manager.clear()
+        self.main_window.todo_manager.load()
+        self.main_window.analytics.update_stats()
+        apply_profile(self.current_profile)
 
     def set_username(self):
         self.username = self.set_usr_field.text()
         self.set_usr_field.setText("")
         self.update_stats()
+        self.save()
 
     def on_selection_change(self):
         self.current_profile = self.theme_dropdown.currentText()
@@ -95,11 +99,11 @@ class SettingsTab(QWidget):
         self.update_stats()
     
     def save(self):
-        save_settings({
-            "username": self.username,
-            "theme": self.current_profile,
-            "sessions": self.increments
-        })
+        data = load_settings()
+        data["username"] = self.username
+        data["theme"] = self.current_profile
+        data["sessions"] = self.increments
+        save_settings(data)
     
     def load(self):
         settings = load_settings()

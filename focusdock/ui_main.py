@@ -159,3 +159,9 @@ class FocusDock(QWidget):
             msg.setText(f"Your timer has finished! You have finished all {completed} tasks! Great job!")
         msg.setIcon(QMessageBox.Icon.Information)
         msg.exec()
+
+    def full_timer_reset(self):
+        self.reset_timer()
+        self.timer_input.setTime(QTime(0, 25, 0))
+        self.set_timer()
+        self.timer_input.setTime(QTime(0, 0, 0))
